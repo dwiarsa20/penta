@@ -1,0 +1,33 @@
+{
+  "name": "penta",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Penta: Truf, Hearts, Sevens, Trumpon and Capsa over four rounds, online with friends",
+  "scripts": {
+    "dev": "concurrently -k -n server,web -c green,cyan \"tsx watch server/index.ts\" \"vite\"",
+    "build": "vite build",
+    "start": "tsx server/index.ts",
+    "test": "vitest run",
+    "typecheck": "tsc"
+  },
+  "type": "module",
+  "dependencies": {
+    "boardgame.io": "^0.50.2",
+    "koa-static": "^5.0.0",
+    "node-persist": "^3.1.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/koa-static": "^4.0.4",
+    "@types/node": "^22.20.5",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "concurrently": "^9.2.5",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.21",
+    "vitest": "^2.1.9"
+  }
+}
