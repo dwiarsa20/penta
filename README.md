@@ -1,30 +1,139 @@
 # Penta
 
-Truf → Hearts → Sevens → Trumpon → Capsa, four rounds, four players, online.
+An online card game for four friends: five classic card games, played back to back over four rounds, with our own house rules.
 
-## Run it
+**Truf → Hearts → Sevens → Trumpon → Capsa**, four times over: 20 hands, one winner.
+
+Built with [boardgame.io](https://boardgame.io) and React, so everyone plays from a browser on their phone or laptop.
+
+> **Status:** the match framework is done and playable end to end. The five games are still placeholders (each player plays one card, highest wins) while the real rules are built one game at a time.
+
+---
+
+## How a match works
+
+A Penta match is always **4 players, no partnerships**, and runs **4 rounds** of the same five games in a fixed order:
+
+| # | Game | Based on |
+|---|------|----------|
+| 1 | Truf | Spades-style trick-taking |
+| 2 | Hearts | Hearts (house rules change by round) |
+| 3 | Sevens | Sevens / layout building |
+| 4 | Trumpon | Spades-style, further removed |
+| 5 | Capsa | Big Two / Chinese poker |
+
+Each game decides its own first player.
+
+## Scoring
+
+**Every hand** uses that game's normal scoring. Then:
+
+- Everyone tied for **best** in the hand gets a **square □** (+1).
+- Everyone tied for **worst** gets a **triangle △** (−1).
+
+**At the end of the match**, each game's four hands are added up and the players are ranked within that game:
+
+| Place | 1st | 2nd | 3rd | 4th |
+|-------|-----|-----|-----|-----|
+| Points | 5 | 3 | 1 | 0 |
+
+- Tied players split the points for the place they share: two players tied for 2nd get 1.5 each.
+- The player after a tie skips a place: 1st, 2nd, 2nd, **4th**.
+
+**Penta score = placement points from all five games + squares − triangles.** Highest score wins; ties share the win.
+
+## Features
+
+- **Lobby with share links:** create a match, send the link, friends pick a seat.
+- **Hidden hands:** the server never sends other players' cards to your browser.
+- **Server-side rules:** every move is checked and shuffling happens on the server, so nobody can cheat from the browser.
+- **Saved matches:** matches are stored on disk, so a restart or a dropped connection doesn't lose a three-hour game. Players can rejoin from the same device.
+- **Live scoresheet:** every hand's score, the □/△ marks, and running placement points.
+- **Mobile-friendly table:** the hand fits on a phone screen, and you always sit at the bottom.
+
+## Getting started
+
+Requires [Node.js](https://nodejs.org) 20 or newer.
+
+```bash
+npm install
+npm run dev
+```
+
+- Open **http://localhost:5173** on your computer.
+- Create a match. The waiting screen shows a link that works for phones **on the same Wi-Fi**, using your computer's local address instead of `localhost`.
+
+To run it the way it would be hosted, with one server for both the game and the website:
+
+```bash
+npm run build
+npm start          # http://localhost:8000
+```
+
+### Scripts
+
+| Command | What it does |
+|---------|--------------|
+| `npm run dev` | Game server (port 8000) and web app with live reload (port 5173) |
+| `npm run build` | Builds the web app into `dist/` |
+| `npm start` | Runs the game server and serves the built app on port 8000 |
+| `npm test` | Runs the scoring and match-flow tests |
+| `npm run typecheck` | TypeScript type check |
+
+### Environment variables
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `PORT` | `8000` | Server port |
+| `DATA_DIR` | `./data` | Where matches are saved |
+| `ORIGIN` | *(any)* | Public site URL to allow when hosting online |
+
+## Project structure
 
 ```
-npm run dev      # game server on :8000 + web app on :5173 (auto-reload)
-npm test         # rules and scoring tests
-npm run build    # build the web app into dist/
-npm start        # one server for everything on :8000 (after build)
+penta/
+├── server/
+│   └── index.ts              # boardgame.io server, lobby API, saved matches, serves the app
+├── src/
+│   ├── shared/
+│   │   ├── cards.ts          # 52-card deck, dealing, sorting
+│   │   └── scoring.ts        # □/△ per hand, 5/3/1/0 placement, final tally
+│   ├── game/
+│   │   ├── module.ts         # The interface every card game implements
+│   │   ├── penta.ts          # Match flow: 4 rounds × 5 games, summaries, game over
+│   │   └── games/
+│   │       ├── index.ts      # Game order (swap placeholders for real games here)
+│   │       └── placeholder.ts
+│   └── client/
+│       ├── App.tsx           # Home, create/join, rejoin
+│       ├── PentaBoard.tsx    # Table, seats, hand summary, final results
+│       ├── components/       # Cards, hand, trick area, scoresheet
+│       ├── games/            # One table screen per game
+│       └── styles.css
+└── test/                     # Vitest: scoring rules and a full simulated match
 ```
 
-Friends on the same Wi-Fi can open `http://<your-PC's-IP>:5173` during `npm run dev`.
-
-## Layout
-
-- `src/shared/scoring.ts` — squares/triangles, placement points (5/3/1/0, ties split), final tally
-- `src/game/module.ts` — the interface every card game implements
-- `src/game/games/` — one file per game (currently placeholders)
-- `src/game/penta.ts` — the match flow: 20 hands, summaries, game over
-- `src/client/games/` — one table component per game
-- `server/index.ts` — boardgame.io server; matches are saved in `data/`
+The rules code in `src/game` and `src/shared` has no UI code in it. The same code runs on the server, in the browser and in tests.
 
 ## Adding a game
 
-1. Write `src/game/games/<game>.ts` implementing `GameModule` (deal, activePlayers, apply, isOver, handScores).
-2. Write `src/client/games/<Game>Board.tsx`.
-3. Swap the placeholder in `src/game/games/index.ts` and `src/client/games/index.ts`.
-4. Add tests in `test/`.
+1. Create `src/game/games/<game>.ts` implementing `GameModule`:
+   - `deal`: start a hand from a shuffled deck
+   - `activePlayers`: who may act right now
+   - `apply`: validate and apply an action such as playing a card or bidding
+   - `isOver`: whether the hand has ended
+   - `handScores`: the hand's scores
+   - `lowerIsBetter`: whether a lower score is better
+2. Create `src/client/games/<Game>Board.tsx` for the table screen.
+3. Replace the placeholder in `src/game/games/index.ts` and `src/client/games/index.ts`.
+4. Add tests under `test/`.
+
+## Roadmap
+
+- [x] Match framework, scoring, lobby, saved matches
+- [ ] Truf
+- [ ] Hearts, including the round-by-round rule changes
+- [ ] Sevens
+- [ ] Trumpon
+- [ ] Capsa
+- [ ] Free online hosting, so friends can join from anywhere
