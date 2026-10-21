@@ -166,7 +166,7 @@ function FinalRanking({ standings, names }: { standings: MatchStandings; names: 
 }
 
 function ShareLink() {
-  const url = useShareUrl();
+  const { url, lanOnly } = useShareUrl();
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -182,7 +182,7 @@ function ShareLink() {
         <input readOnly value={url} onFocus={(e) => e.target.select()} />
         <button onClick={copy}>{copied ? 'Copied' : 'Copy'}</button>
       </div>
-      {isLocalhost() && <p className="note">Friends need to be on the same Wi-Fi as this computer.</p>}
+      {lanOnly && <p className="note">Friends need to be on the same Wi-Fi as this computer.</p>}
     </>
   );
 }
@@ -190,22 +190,26 @@ function ShareLink() {
 const isLocalhost = () => ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
 
 /**
- * "localhost" only works on this computer, so when the page was opened that way,
- * swap in the computer's Wi-Fi address so the link works on phones too.
+ * "localhost" only works on this computer, so when the page was opened that way, swap in
+ * the public link (when hosting with `npm run host`) or else the computer's Wi-Fi address.
  */
 function useShareUrl() {
-  const [url, setUrl] = useState(window.location.href);
+  const [share, setShare] = useState({ url: window.location.href, lanOnly: false });
   useEffect(() => {
     if (!isLocalhost()) return;
-    fetch(`${SERVER_URL}/lan`)
-      .then((r) => r.json() as Promise<string[]>)
-      .then(([ip]) => {
-        if (!ip) return;
-        const u = new URL(window.location.href);
-        u.hostname = ip;
-        setUrl(u.toString());
+    fetch(`${SERVER_URL}/share`)
+      .then((r) => r.json() as Promise<{ public: string | null; lan: string[] }>)
+      .then(({ public: online, lan: [ip] }) => {
+        const here = new URL(window.location.href);
+        if (online) {
+          const u = new URL(here.pathname + here.search, online);
+          setShare({ url: u.toString(), lanOnly: false });
+        } else if (ip) {
+          here.hostname = ip;
+          setShare({ url: here.toString(), lanOnly: true });
+        }
       })
       .catch(() => {});
   }, []);
-  return url;
+  return share;
 }

@@ -1,1 +1,3 @@
 * text=auto eol=lf
+# The Windows launcher needs Windows line endings.
+*.cmd text eol=crlf

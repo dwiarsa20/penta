@@ -36,10 +36,11 @@ function lanAddresses(): string[] {
     .sort((a, b) => rank(a) - rank(b));
 }
 
-// Lets a page opened as "localhost" build a share link that phones on the same Wi-Fi can open.
+// Lets a page opened as "localhost" build a share link others can open: the public link
+// when hosting with `npm run host`, otherwise this PC's address on the Wi-Fi.
 server.app.use(async (ctx, next) => {
-  if (ctx.path === '/lan') {
-    ctx.body = lanAddresses();
+  if (ctx.path === '/share') {
+    ctx.body = { public: process.env.PUBLIC_URL ?? null, lan: lanAddresses() };
     return;
   }
   await next();

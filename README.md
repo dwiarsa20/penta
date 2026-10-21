@@ -6,7 +6,7 @@ An online card game for four friends: five classic card games, played back to ba
 
 Built with [boardgame.io](https://boardgame.io) and React, so everyone plays from a browser on their phone or laptop.
 
-> **Status:** all five games and the match framework are done, and it can be hosted online for free (see [Hosting online](#hosting-online-for-free)).
+> **Status:** all five games are done. Anyone can host a game night from their own computer for free: see [Host a game night](#host-a-game-night).
 
 ---
 
@@ -119,9 +119,39 @@ Standard Hearts.
 - **Lobby with share links:** create a match, send the link, friends pick a seat.
 - **Hidden hands:** the server never sends other players' cards to your browser.
 - **Server-side rules:** every move is checked and shuffling happens on the server, so nobody can cheat from the browser.
-- **Saved matches:** matches are saved on disk, or in a Postgres database when hosted, so a restart or a dropped connection doesn't lose a three-hour game. Players can rejoin from the same device.
+- **Saved matches:** matches are saved on the host's disk (or in Postgres if `DATABASE_URL` is set), so a restart or a dropped connection doesn't lose a three-hour game. Players can rejoin from the same device.
 - **Live scoresheet:** every hand's score, the □/△ marks, and running placement points.
 - **Mobile-friendly table:** the hand fits on a phone screen, and you always sit at the bottom.
+
+## Host a game night
+
+One player hosts the game on their computer, and everyone else joins with a link from their phone or laptop, from anywhere. It's free, with no account or card: the link comes from a free [Cloudflare quick tunnel](https://try.cloudflare.com). Anyone in the group can be the host.
+
+### First time
+
+1. **Install [Node.js](https://nodejs.org)** (the LTS version).
+2. **Get Penta** from GitHub, either way:
+   - On the [repository page](https://github.com/dwiarsa20/penta), click **Code → Download ZIP** and unzip it.
+   - Or, with [Git](https://git-scm.com): `git clone https://github.com/dwiarsa20/penta.git`. A Git copy updates itself every time you host.
+
+### Hosting
+
+- **Windows:** double-click **`Host Penta.cmd`** in the Penta folder.
+- **Mac or Linux:** in a terminal in the Penta folder, run `npm install`, then `npm run host`.
+
+The first time takes a few minutes while it installs. When it's ready, the window shows a link like `https://some-random-words.trycloudflare.com`, and the game opens in your browser.
+
+Create a match there. The link on the waiting screen is the public one, so copy it and send it to your friends.
+
+**Keep the window open while you play.** Closing it stops the game for everyone.
+
+### Good to know
+
+- **The link is new every time you start hosting**, so send it after you start.
+- **Matches are saved on the host's computer**, in the `data` folder. A different host starts with fresh matches.
+- **If hosting stops mid-match**, start it again on the same computer and the match is still there, at a new link. Players' seats are remembered per link, though, so friends can only watch from the new link, not take their seats back.
+- **The host's computer must stay awake.** Sleep mode stops the game.
+- Windows may ask whether to let Node.js through the firewall. Either answer works; allowing it only matters for players on your own Wi-Fi.
 
 ## Getting started
 
@@ -155,6 +185,7 @@ The bar along the top deals a fresh hand of any game in any round, so you can te
 | `npm run dev` | Game server (port 8000) and web app with live reload (port 5173) |
 | `npm run build` | Builds the web app into `dist/` |
 | `npm start` | Runs the game server and serves the built app on port 8000 |
+| `npm run host` | Builds the app, runs the server and opens a public link (see [Host a game night](#host-a-game-night)) |
 | `npm test` | Runs the scoring and match-flow tests |
 | `npm run typecheck` | TypeScript type check |
 
@@ -165,31 +196,17 @@ The bar along the top deals a fresh hand of any game in any round, so you can te
 | `PORT` | `8000` | Server port |
 | `DATABASE_URL` | *(none)* | Postgres connection string. When set, matches are saved there instead of on disk. |
 | `DATA_DIR` | `./data` | Where matches are saved when there's no database |
-| `ORIGIN` | *(any)* | Public site URL to allow when hosting online. On Render this is set automatically. |
-
-## Hosting online for free
-
-The game runs on [Render](https://render.com)'s free plan, with matches saved in a free [Neon](https://neon.com) Postgres database. Neither needs a credit card. Both live in Singapore, close to the players.
-
-1. **Database:** sign up at [neon.com](https://neon.com) and create a project in **AWS Asia Pacific (Singapore)**. Copy its connection string; it starts with `postgresql://`.
-2. **Server:** sign up at [render.com](https://render.com) with your GitHub account. Choose **New → Blueprint** and pick this repository. Render reads `render.yaml`, asks for `DATABASE_URL` (paste the connection string), then builds and starts the game.
-3. **Play:** open the `https://penta-….onrender.com` address Render gives you, create a match and send the link to your friends.
-
-Every push to `main` redeploys automatically.
-
-**Free plan limits:**
-
-- After **15 minutes** with nobody connected, the server goes to sleep. The next visit wakes it up, which takes about a minute. Saved matches aren't affected.
-- While a match is being played, the server stays awake. If a connection drops, the page reconnects by itself.
-- Render allows 750 free hours a month, more than one always-on server uses. Neon allows 100 database compute-hours a month, and the database also sleeps when idle.
+| `ORIGIN` | *(any)* | Public site URL to allow, when hosting on a server with a fixed address |
 
 ## Project structure
 
 ```
 penta/
+├── Host Penta.cmd            # Windows: double-click to host
 ├── server/
 │   ├── index.ts              # boardgame.io server, lobby API, saved matches, serves the app
-│   └── postgres.ts           # Match storage in Postgres, for hosting
+│   ├── host.ts               # npm run host: the server plus a public link
+│   └── postgres.ts           # Optional match storage in Postgres (DATABASE_URL)
 ├── src/
 │   ├── shared/
 │   │   ├── cards.ts          # 52-card deck, dealing, sorting
@@ -232,4 +249,4 @@ The rules code in `src/game` and `src/shared` has no UI code in it. The same cod
 - [x] Sevens
 - [x] Trumpon
 - [x] Capsa
-- [x] Free online hosting, so friends can join from anywhere
+- [x] Free hosting from any player's computer, so friends can join from anywhere
