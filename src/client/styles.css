@@ -222,7 +222,8 @@ h2 { margin: 0 0 0.5em; font-size: 1.15rem; }
   bottom: 4%;
   font-size: calc(var(--card-w) * 0.45);
 }
-.card.small { --card-w: var(--small-w); }
+/* --card-h is worked out once on :root from the full width, so small cards set their height too. */
+.card.small { --card-w: var(--small-w); height: var(--small-h); }
 .card.selected { transform: translateY(-14px); box-shadow: 0 0 0 3px var(--accent), 0 4px 10px rgba(0, 0, 0, 0.5); }
 .card.dimmed { filter: brightness(0.6); }
 .card.back {
