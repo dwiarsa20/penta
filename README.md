@@ -123,6 +123,12 @@ npm run build
 npm start          # http://localhost:8000
 ```
 
+### Testing on your own
+
+While running `npm run dev`, the home page has a **Test match: play all 4 seats** button. It opens one page with all four players' screens side by side.
+
+The bar along the top deals a fresh hand of any game in any round, so you can test a game without playing up to it. It only works in test matches.
+
 ### Scripts
 
 | Command | What it does |

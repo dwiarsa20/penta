@@ -17,6 +17,10 @@ export interface PentaState {
   history: HandRecord[];
   ready: boolean[]; // who has confirmed the hand summary
   lastError: { player: number; message: string } | null;
+  /** A development test match, where the hand can be jumped to any game. */
+  test: boolean;
+  /** How many times a test match has jumped, so the table starts fresh each time. */
+  jumps: number;
 }
 
 /** What a client receives: the current hand with other players' cards hidden. */
@@ -44,7 +48,7 @@ export const Penta: Game<PentaState> = {
   maxPlayers: PLAYERS,
   disableUndo: true,
 
-  setup: ({ random }) => ({
+  setup: ({ random }, setupData?: { test?: boolean }) => ({
     round: 0,
     gameIndex: 0,
     status: 'playing',
@@ -52,6 +56,8 @@ export const Penta: Game<PentaState> = {
     history: [],
     ready: Array(PLAYERS).fill(false),
     lastError: null,
+    test: !!setupData?.test,
+    jumps: 0,
   }),
 
   turn: {
@@ -107,6 +113,23 @@ export const Penta: Game<PentaState> = {
             G.hand = GAMES[G.gameIndex].deal(random.Shuffle(newDeck()), G.round);
           }
         }
+        setActive(events, activeFor(G));
+      },
+    },
+
+    /** Test matches only: deal a fresh hand of any game in any round. */
+    jump: {
+      client: false,
+      move: ({ G, events, random }, gameIndex: number, round: number) => {
+        const valid = (n: unknown, max: number) => Number.isInteger(n) && (n as number) >= 0 && (n as number) < max;
+        if (!G.test || !valid(gameIndex, GAMES.length) || !valid(round, ROUNDS)) return INVALID_MOVE;
+        G.gameIndex = gameIndex;
+        G.round = round;
+        G.status = 'playing';
+        G.hand = GAMES[gameIndex].deal(random.Shuffle(newDeck()), round);
+        G.ready = Array(PLAYERS).fill(false);
+        G.lastError = null;
+        G.jumps++;
         setActive(events, activeFor(G));
       },
     },

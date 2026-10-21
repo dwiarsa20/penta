@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Client } from 'boardgame.io/react';
 import { SocketIO } from 'boardgame.io/multiplayer';
-import { LobbyClient } from 'boardgame.io/client';
+import { Client as HeadlessClient, LobbyClient } from 'boardgame.io/client';
+import { GAMES, ROUNDS } from '../game/games';
 import { Penta } from '../game/penta';
 import { GAME_NAME, SERVER_URL } from './config';
 import { PentaBoard } from './PentaBoard';
@@ -92,7 +93,7 @@ function Home() {
     setBusy(true);
     setError('');
     try {
-      const { matchID } = await lobby.createMatch(GAME_NAME, { numPlayers: 4 });
+      const { matchID } = await lobby.createMatch(GAME_NAME, { numPlayers: 4, setupData: { test: true } });
       const seats: store.SavedSeat[] = [];
       for (const playerID of ['0', '1', '2', '3']) {
         const { playerCredentials } = await lobby.joinMatch(GAME_NAME, matchID, {
@@ -238,9 +239,75 @@ function MatchRoom({ matchID }: { matchID: string }) {
 /** All four players' screens on one page, each in its own frame. Development only. */
 function TestTable({ matchID }: { matchID: string }) {
   return (
-    <div className="test-table">
-      {[0, 1, 2, 3].map((p) => (
-        <iframe key={p} title={`Player ${p + 1}`} src={`?match=${encodeURIComponent(matchID)}&as=${p}`} />
+    <div className="test-page">
+      <JumpBar matchID={matchID} />
+      <div className="test-table">
+        {[0, 1, 2, 3].map((p) => (
+          <iframe key={p} title={`Player ${p + 1}`} src={`?match=${encodeURIComponent(matchID)}&as=${p}`} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+type Headless = ReturnType<typeof HeadlessClient>;
+
+/** Deals a fresh hand of any game and round, so a game can be tested without playing up to it. */
+function JumpBar({ matchID }: { matchID: string }) {
+  const [clients, setClients] = useState<Headless[]>([]);
+  const [now, setNow] = useState<{ round: number; gameIndex: number; test: boolean } | null>(null);
+  const [round, setRound] = useState<number | null>(null);
+
+  // One connection per seat: boardgame.io only takes a move from a player who may act right now.
+  useEffect(() => {
+    const cs = store.getTestSeats(matchID).map((seat) =>
+      HeadlessClient({
+        game: Penta,
+        numPlayers: 4,
+        multiplayer: SocketIO({ server: SERVER_URL }),
+        matchID,
+        playerID: seat.playerID,
+        credentials: seat.credentials,
+        debug: false,
+      }),
+    );
+    cs.forEach((c) => c.start());
+    const unsubscribe = cs[0]?.subscribe((state) => {
+      if (state) setNow({ round: state.G.round, gameIndex: state.G.gameIndex, test: !!state.G.test });
+    });
+    setClients(cs);
+    return () => {
+      unsubscribe?.();
+      cs.forEach((c) => c.stop());
+    };
+  }, [matchID]);
+
+  const target = round ?? now?.round ?? 0;
+  const jump = (gameIndex: number) => {
+    const active = Object.keys(clients[0]?.getState()?.ctx.activePlayers ?? {});
+    clients.find((c) => active.includes(String(c.playerID)))?.moves.jump(gameIndex, target);
+  };
+
+  if (now && !now.test) return <p className="jump-bar muted">This match was created before jumping existed. Start a new test match to jump between games.</p>;
+  return (
+    <div className="jump-bar">
+      <span className="muted">Jump to</span>
+      <select value={target} onChange={(e) => setRound(Number(e.target.value))}>
+        {Array.from({ length: ROUNDS }, (_, r) => (
+          <option key={r} value={r}>
+            Round {r + 1}
+          </option>
+        ))}
+      </select>
+      {GAMES.map((g, i) => (
+        <button
+          key={g.id}
+          className={now?.gameIndex === i && now.round === target ? 'current' : ''}
+          disabled={!now}
+          onClick={() => jump(i)}
+        >
+          {g.name}
+        </button>
       ))}
     </div>
   );

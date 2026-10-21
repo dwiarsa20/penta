@@ -53,6 +53,7 @@ export function PentaBoard({ G, ctx, moves, playerID, matchData }: BoardProps<Pe
           ))}
 
         <GameBoard
+          key={`${G.round}-${G.gameIndex}-${G.jumps}`}
           view={G.hand}
           me={me}
           round={G.round}

@@ -14,9 +14,10 @@ import type { HandView } from '../src/game/module';
 
 let matchCount = 0;
 
-function setup() {
+function setup({ test = false } = {}) {
   // Local matches share storage, so each test needs its own match ID.
-  const spec = { game: Penta, numPlayers: 4, multiplayer: Local(), matchID: `test-${++matchCount}` };
+  const game = test ? { ...Penta, setup: (ctx: any) => Penta.setup!(ctx, { test: true }) } : Penta;
+  const spec = { game, numPlayers: 4, multiplayer: Local(), matchID: `test-${++matchCount}` };
   const clients = ['0', '1', '2', '3'].map((playerID) => Client({ ...spec, playerID }));
   clients.forEach((c) => c.start());
   const state = (p: number) => clients[p].getState()!;
@@ -64,6 +65,23 @@ describe('Penta match flow', () => {
     const G = state(0).G as PentaView;
     expect(G.hand.hands[0]).toHaveLength(13);
     expect(G.lastError).toEqual({ player: 0, message: 'Pick a card to bid with first.' });
+  });
+});
+
+describe('Test match jumping', () => {
+  it('deals a fresh hand of any game and round', () => {
+    const { clients, state } = setup({ test: true });
+    clients[0].moves.jump(3, 2);
+    const G = state(0).G as PentaView;
+    expect([G.gameIndex, G.round, G.status, G.jumps]).toEqual([3, 2, 'playing', 1]);
+    expect(GAMES[G.gameIndex].id).toBe('trumpon');
+    expect(G.hand.hands[0]).toHaveLength(4);
+  });
+
+  it('is refused in a normal match', () => {
+    const { clients, state } = setup();
+    clients[0].moves.jump(3, 2);
+    expect([state(0).G.gameIndex, state(0).G.round]).toEqual([0, 0]);
   });
 });
 
