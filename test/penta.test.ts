@@ -5,6 +5,9 @@ import { describe, expect, it } from 'vitest';
 import { Client } from 'boardgame.io/client';
 import { Local } from 'boardgame.io/multiplayer';
 import { Penta, type PentaView } from '../src/game/penta';
+import { GAMES } from '../src/game/games';
+import { legalCards, type TrufState } from '../src/game/games/truf';
+import type { HandView } from '../src/game/module';
 
 let matchCount = 0;
 
@@ -35,7 +38,7 @@ describe('Penta match flow', () => {
       const p = active[0];
       const view = state(p).G as PentaView;
       if (view.status === 'playing') {
-        clients[p].moves.act({ type: 'play', cardId: view.hand.hands[p][0].id });
+        clients[p].moves.act(autoAction(view, p));
       } else if (G.status === 'summary') {
         if (p === 0) hands++;
         clients[p].moves.ready();
@@ -51,15 +54,27 @@ describe('Penta match flow', () => {
     expect(final.reduce((a, b) => a + b, 0)).toBeCloseTo(5 * 9 - countTieLoss(G) + marks);
   });
 
-  it('rejects playing out of turn without changing the hand', () => {
+  it('rejects an illegal action without changing the hand', () => {
     const { clients, state } = setup();
-    const active = Object.keys(state(0).ctx.activePlayers ?? {}).map(Number);
-    const other = (active[0] + 1) % 4;
-    const before = (state(other).G as PentaView).hand.hands[other].length;
-    clients[other].moves.act({ type: 'play', cardId: (state(other).G as PentaView).hand.hands[other][0].id });
-    expect((state(other).G as PentaView).hand.hands[other]).toHaveLength(before);
+    // Truf starts with bidding, so playing a card is illegal.
+    clients[0].moves.act({ type: 'play', cardId: (state(0).G as PentaView).hand.hands[0][0].id });
+    const G = state(0).G as PentaView;
+    expect(G.hand.hands[0]).toHaveLength(13);
+    expect(G.lastError).toEqual({ player: 0, message: 'Pick a card to bid with first.' });
   });
 });
+
+/** The simplest legal action for player `p` in the current game. */
+function autoAction(G: PentaView, p: number): unknown {
+  if (GAMES[G.gameIndex].id === 'truf') {
+    const s = G.hand as HandView<TrufState>;
+    if (s.phase === 'bid') return { type: 'bid', cardId: s.hands[p][0].id };
+    if (s.phase === 'reveal') return { type: 'confirm' };
+    if (s.phase === 'choose') return { type: 'mode', mode: 'bawah' };
+    return { type: 'play', cardId: legalCards(s, p)[0].id };
+  }
+  return { type: 'play', cardId: G.hand.hands[p][0].id };
+}
 
 /** With competition ranking, a tie skips places, so fewer than 9 points get handed out. */
 function countTieLoss(G: Pick<PentaView, 'history'>) {

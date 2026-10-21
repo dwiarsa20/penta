@@ -170,6 +170,18 @@ h2 { margin: 0 0 0.5em; font-size: 1.15rem; }
 .trick-slot.right { grid-area: right; }
 .trick-slot.bottom { grid-area: bottom; }
 .trick-slot.win .card { box-shadow: 0 0 0 3px var(--accent); }
+.trick-slot { display: flex; flex-direction: column; align-items: center; gap: 2px; transition: transform 0.4s ease-in, opacity 0.4s ease-in; }
+.trick-label { font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+.trick.slide-bottom .trick-slot { transform: translateY(250%); opacity: 0; }
+.trick.slide-top .trick-slot { transform: translateY(-250%); opacity: 0; }
+.trick.slide-left .trick-slot { transform: translateX(-250%); opacity: 0; }
+.trick.slide-right .trick-slot { transform: translateX(250%); opacity: 0; }
+
+/* Truf: trump line and everyone's tricks/bid. */
+.truf-info { margin: 0 0 4px; font-size: 0.9rem; text-align: center; }
+.truf-bids { list-style: none; padding: 0; margin: 6px 0 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; font-size: 0.85rem; }
+.truf-bids .name { font-weight: 600; }
+.truf-bids li.caller .name { color: var(--accent); }
 
 /* ---------- Cards ---------- */
 

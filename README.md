@@ -6,7 +6,7 @@ An online card game for four friends: five classic card games, played back to ba
 
 Built with [boardgame.io](https://boardgame.io) and React, so everyone plays from a browser on their phone or laptop.
 
-> **Status:** the match framework is done and playable end to end. The five games are still placeholders (each player plays one card, highest wins) while the real rules are built one game at a time.
+> **Status:** the match framework and **Truf** are done. The other four games are still placeholders (each player plays one card, highest wins) while the real rules are built one game at a time.
 
 ---
 
@@ -41,6 +41,23 @@ Each game decides its own first player.
 - The player after a tie skips a place: 1st, 2nd, 2nd, **4th**.
 
 **Penta score = placement points from all five games + squares − triangles.** Highest score wins; ties share the win.
+
+## House rules
+
+### Truf
+
+1. **Bid:** after the deal, everyone secretly picks a card from their hand as their bid. **2–10** bid their number, **A** bids 1, **J/Q/K** bid 0. The card stays in your hand.
+2. **Trump:** bids are revealed together, and play waits until all four players have confirmed them. The highest bid card's suit is trump, and its owner (the caller) leads first. Ties go to the higher rank (K > Q > J among 0 bids), then suit: ♠ > ♥ > ♦ > ♣.
+3. **Bawah or Atas:** if the bids add up to under 13 it's a **Bawah** game, over 13 it's **Atas**. At exactly 13 the caller chooses, and every bid goes down 1 (Bawah, never below 0) or up 1 (Atas).
+4. **Play:** follow suit if you can. Trump can't be led until it's been broken. Trumps are always played **face down**, whether leading or following, and are turned over once the trick is complete.
+5. **Scoring:** win exactly your bid and you score it. Otherwise, for each trick you're off:
+
+   | | Under your bid | Over your bid |
+   |---|---|---|
+   | Bawah | −1 each | −2 each |
+   | Atas | −2 each | −1 each |
+
+   A **0 bid** (J/Q/K) scores **+5** if made, or **−5** on top of the normal penalty if missed. It keeps the ±5 even when Atas raises it to 1.
 
 ## Features
 
@@ -131,7 +148,7 @@ The rules code in `src/game` and `src/shared` has no UI code in it. The same cod
 ## Roadmap
 
 - [x] Match framework, scoring, lobby, saved matches
-- [ ] Truf
+- [x] Truf
 - [ ] Hearts, including the round-by-round rule changes
 - [ ] Sevens
 - [ ] Trumpon

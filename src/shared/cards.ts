@@ -10,6 +10,13 @@ export interface Card {
   rank: Rank;
 }
 
+/** A card someone else played or picked face down: you only see its back. */
+export interface FaceDownCard {
+  faceDown: true;
+}
+
+export const isFaceDown = (c: Card | FaceDownCard): c is FaceDownCard => 'faceDown' in c;
+
 export const SUITS: Suit[] = ['C', 'D', 'H', 'S'];
 export const RANKS: Rank[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 

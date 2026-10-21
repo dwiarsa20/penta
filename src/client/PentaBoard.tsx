@@ -5,6 +5,7 @@ import { GAMES, ROUNDS } from '../game/games';
 import type { PentaView } from '../game/penta';
 import type { MatchStandings } from '../shared/scoring';
 import { fmt, Marks, Scoreboard } from './components/Scoreboard';
+import { TRICK_SHOW_MS, TRICK_SLIDE_MS } from './components/TrickArea';
 import { GAME_BOARDS } from './games';
 import type { SeatPosition } from './games/types';
 
@@ -23,6 +24,8 @@ export function PentaBoard({ G, ctx, moves, playerID, matchData }: BoardProps<Pe
   const GameBoard = GAME_BOARDS[game.id];
   const lastHand = G.history[G.history.length - 1];
   const gameover = ctx.gameover as { standings: MatchStandings } | undefined;
+  // Let the last trick of the hand finish on the table before the summary covers it.
+  const showSummary = useDelayed(G.status === 'summary', TRICK_SHOW_MS + TRICK_SLIDE_MS);
 
   return (
     <div className="board">
@@ -80,7 +83,7 @@ export function PentaBoard({ G, ctx, moves, playerID, matchData }: BoardProps<Pe
         </div>
       )}
 
-      {G.status === 'summary' && lastHand && (
+      {showSummary && lastHand && (
         <div className="overlay">
           <div className="panel">
             <h2>{game.name} finished</h2>
@@ -131,6 +134,18 @@ export function PentaBoard({ G, ctx, moves, playerID, matchData }: BoardProps<Pe
       )}
     </div>
   );
+}
+
+/** True once `on` has stayed true for `ms`; false again as soon as it turns off. */
+function useDelayed(on: boolean, ms: number) {
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    setDone(false);
+    if (!on) return;
+    const timer = setTimeout(() => setDone(true), ms);
+    return () => clearTimeout(timer);
+  }, [on, ms]);
+  return on && done;
 }
 
 function FinalRanking({ standings, names }: { standings: MatchStandings; names: string[] }) {
