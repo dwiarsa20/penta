@@ -6,7 +6,7 @@ An online card game for four friends: five classic card games, played back to ba
 
 Built with [boardgame.io](https://boardgame.io) and React, so everyone plays from a browser on their phone or laptop.
 
-> **Status:** the match framework, **Truf** and **Hearts** are done. The other three games are still placeholders (each player plays one card, highest wins) while the real rules are built one game at a time.
+> **Status:** the match framework, **Truf**, **Hearts** and **Sevens** are done. The other two games are still placeholders (each player plays one card, highest wins) while the real rules are built one game at a time.
 
 ---
 
@@ -18,7 +18,7 @@ A Penta match is always **4 players, no partnerships**, and runs **4 rounds** of
 |---|------|----------|
 | 1 | Truf | Spades-style trick-taking |
 | 2 | Hearts | Standard Hearts (passing changes by round) |
-| 3 | Sevens | Sevens / layout building |
+| 3 | Sevens | Sevens / layout building, with wild Aces |
 | 4 | Trumpon | Spades-style, further removed |
 | 5 | Capsa | Big Two / Chinese poker |
 
@@ -67,6 +67,21 @@ Standard Hearts.
 2. **Play:** whoever holds the 2♣ leads it. Follow suit if you can. There's no trump, so the highest card of the suit led wins. No hearts or Q♠ on the first trick unless you have nothing else. Hearts can't be led until one has been played, unless you hold only hearts.
 3. **Scoring:** 1 point per heart and 13 for the Q♠. **Lowest is best.**
 4. **Shooting the moon:** take all 26 points and you score 0 while everyone else scores 26. So the shooter gets the □ and the other three each get a △.
+
+### Sevens
+
+1. **Start:** round 1 opens with the **7♠**, round 2 the **7♥**, round 3 the **7♦** and round 4 the **7♣**. Whoever holds it plays it first.
+2. **Play:** each suit builds up and down from its 7, and any 7 starts its suit. Play goes left. **You must play if you can.**
+3. **Closing a card:** if you can't play, you **close** a card: lay any card from your hand face down in front of you. It's out of the hand and counts against you. Others only see how many you've closed until the hand ends. The hand ends when everyone's hand is empty.
+4. **Aces are wild:** until the first Ace is played, an Ace can go on its suit's **K** or below its **2**. The first one decides for the whole hand:
+   - On a K makes **Aces high**: later Aces only go on Ks.
+   - Below a 2 makes **Aces low**: later Aces only go below 2s.
+5. **Closed suits:** once Aces are set, a suit closes as soon as either end is finished, and nothing more can be played on it:
+   - Aces high: when its A goes on the K, or when its 2 is played.
+   - Aces low: when its A goes below the 2, or when its K is played.
+
+   Any suit whose end was already finished when the Aces were set closes right then.
+6. **Scoring:** the total of your closed cards. 2–10 count face value, J 11, Q 12, K 13. Aces count **14** if Aces are high, **1** if low, and **7** if no Ace was ever played. **Lowest is best.**
 
 ## Features
 
@@ -159,7 +174,7 @@ The rules code in `src/game` and `src/shared` has no UI code in it. The same cod
 - [x] Match framework, scoring, lobby, saved matches
 - [x] Truf
 - [x] Hearts
-- [ ] Sevens
+- [x] Sevens
 - [ ] Trumpon
 - [ ] Capsa
 - [ ] Free online hosting, so friends can join from anywhere

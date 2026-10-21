@@ -189,6 +189,25 @@ h2 { margin: 0 0 0.5em; font-size: 1.15rem; }
 .truf-bids .name { font-weight: 600; }
 .truf-bids li.caller .name { color: var(--accent); }
 
+/* Sevens: one column per suit, the 7 in the middle, the high end above and the low end below.
+   Cards overlap so each one's corner still shows. */
+.sevens-layout { display: flex; gap: 8px; justify-content: center; }
+.sevens-suit { display: flex; flex-direction: column; align-items: center; }
+.sevens-slot { width: var(--small-w); height: var(--small-h); position: relative; }
+.sevens-slot + .sevens-slot { margin-top: calc(var(--small-h) * -0.55); }
+.sevens-slot.spacer { visibility: hidden; }
+.sevens-slot.empty {
+  display: grid;
+  place-items: center;
+  border: 2px dashed rgba(255, 255, 255, 0.25);
+  border-radius: calc(var(--small-w) * 0.1);
+  color: var(--muted);
+  font-size: calc(var(--small-w) * 0.45);
+}
+.sevens-slot.last .card { box-shadow: 0 0 0 3px var(--accent); }
+.sevens-suit.closed .card { filter: brightness(0.55); }
+.sevens-tag { font-size: 0.7rem; color: var(--muted); }
+
 /* ---------- Cards ---------- */
 
 .card {

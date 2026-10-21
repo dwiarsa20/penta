@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 import type { GameId } from '../../game/module';
 import { HeartsBoard } from './HeartsBoard';
 import { PlaceholderBoard } from './PlaceholderBoard';
+import { SevensBoard } from './SevensBoard';
 import { TrufBoard } from './TrufBoard';
 import type { GameBoardProps } from './types';
 
@@ -9,7 +10,7 @@ import type { GameBoardProps } from './types';
 export const GAME_BOARDS: Record<GameId, ComponentType<GameBoardProps>> = {
   truf: TrufBoard,
   hearts: HeartsBoard,
-  sevens: PlaceholderBoard,
+  sevens: SevensBoard,
   trumpon: PlaceholderBoard,
   capsa: PlaceholderBoard,
 };

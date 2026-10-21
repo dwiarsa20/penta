@@ -8,6 +8,7 @@ import { lowerIsBetter, Penta, type PentaView } from '../src/game/penta';
 import { GAMES } from '../src/game/games';
 import { legalCards, type TrufState } from '../src/game/games/truf';
 import { legalCards as heartsLegal, type HeartsState } from '../src/game/games/hearts';
+import { legalCards as sevensLegal, placements, type SevensState } from '../src/game/games/sevens';
 import type { HandView } from '../src/game/module';
 
 let matchCount = 0;
@@ -78,6 +79,11 @@ function autoAction(G: PentaView, p: number): unknown {
     const s = G.hand as HandView<HeartsState>;
     if (s.phase === 'pass') return { type: 'pass', cardIds: s.hands[p].slice(0, 3).map((c) => c.id) };
     return { type: 'play', cardId: heartsLegal(s, p)[0].id };
+  }
+  if (GAMES[G.gameIndex].id === 'sevens') {
+    const s = G.hand as HandView<SevensState>;
+    const [card] = sevensLegal(s, p);
+    return card ? { type: 'play', cardId: card.id, end: placements(s, card)[0] } : { type: 'close', cardId: s.hands[p][0].id };
   }
   return { type: 'play', cardId: G.hand.hands[p][0].id };
 }
