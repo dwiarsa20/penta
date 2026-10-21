@@ -10,6 +10,7 @@ import { legalCards, type TrufState } from '../src/game/games/truf';
 import { legalCards as heartsLegal, type HeartsState } from '../src/game/games/hearts';
 import { legalCards as sevensLegal, placements, type SevensState } from '../src/game/games/sevens';
 import { legalCards as trumponLegal, type TrumponState } from '../src/game/games/trumpon';
+import { playError, type CapsaState } from '../src/game/games/capsa';
 import type { HandView } from '../src/game/module';
 
 let matchCount = 0;
@@ -36,7 +37,7 @@ describe('Penta match flow', () => {
   it('plays 20 hands and ends with standings', () => {
     const { clients, state } = setup();
     let hands = 0;
-    for (let guard = 0; guard < 1000 && !state(0).ctx.gameover; guard++) {
+    for (let guard = 0; guard < 5000 && !state(0).ctx.gameover; guard++) {
       const { G, ctx } = state(0);
       const active = Object.keys(ctx.activePlayers ?? {}).map(Number);
       const p = active[0];
@@ -107,7 +108,10 @@ function autoAction(G: PentaView, p: number): unknown {
   if (GAMES[G.gameIndex].id === 'trumpon') {
     return { type: 'play', cardId: trumponLegal(G.hand as HandView<TrumponState>, p)[0].id };
   }
-  return { type: 'play', cardId: G.hand.hands[p][0].id };
+  // Capsa: the lowest single that plays, otherwise pass.
+  const s = G.hand as HandView<CapsaState>;
+  const card = s.hands[p].find((c) => !playError(s, p, [c]));
+  return card ? { type: 'play', cardIds: [card.id] } : { type: 'pass' };
 }
 
 /** With competition ranking, a tie skips places, so fewer than 9 points get handed out. */

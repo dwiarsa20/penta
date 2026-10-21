@@ -6,7 +6,7 @@ An online card game for four friends: five classic card games, played back to ba
 
 Built with [boardgame.io](https://boardgame.io) and React, so everyone plays from a browser on their phone or laptop.
 
-> **Status:** the match framework, **Truf**, **Hearts**, **Sevens** and **Trumpon** are done. **Capsa** is still a placeholder (each player plays one card, highest wins) while the real rules are built one game at a time.
+> **Status:** all five games and the match framework are done. Next up is free online hosting.
 
 ---
 
@@ -20,7 +20,7 @@ A Penta match is always **4 players, no partnerships**, and runs **4 rounds** of
 | 2 | Hearts | Standard Hearts (passing changes by round) |
 | 3 | Sevens | Sevens / layout building, with wild Aces |
 | 4 | Trumpon | Truf with piles on the table instead of bids |
-| 5 | Capsa | Big Two / Chinese poker |
+| 5 | Capsa | Big Two, with bombs |
 
 Each game decides its own first player.
 
@@ -95,6 +95,25 @@ Standard Hearts.
    |---|---|---|---|---|---|---|---|---|---|---|
    | Points | +1 | −1 | −2 | −3 | −4 | +5 | +1 | +2 | +3 | +4 |
 
+### Capsa
+
+1. **Ranks:** 3 is low and **2 is high**: 3 4 5 6 7 8 9 10 J Q K A 2. Between cards of the same rank, suits go ♦ < ♣ < ♥ < ♠.
+2. **Start:** whoever holds the **3♦** leads, every round, and their first play must include it.
+3. **Play:** play a single, a pair, a triple or a 5-card hand. Play goes left. Each player must play the same number of cards, but higher, or **pass**. Once you pass you're out until the next lead. When everyone else is out, whoever played last leads anything.
+4. **Pairs** compare by rank, then the higher suit in the pair. **Triples** compare by rank.
+5. **5-card hands**, low to high. A higher kind always wins.
+
+   | Hand | Compared by |
+   |---|---|
+   | Straight | Top card, then its suit. A-2-3-4-5 is the lowest (the Ace counts 1), then 2-3-4-5-6, up to 10-J-Q-K-A. J-Q-K-A-2 doesn't count. |
+   | Flush | Suit first, then the highest card |
+   | Full house | The three of a kind |
+   | Four of a kind + 1 card | The four of a kind |
+   | Straight flush | Top card, then its suit |
+
+6. **Bombs:** four of a kind and straight flushes. If you've **never passed this hand**, you can play a bomb on your turn on top of anything: a single, a pair or a triple. After that, only a higher bomb from another player who hasn't passed can beat it. Once you've passed, bombs are just the highest 5-card hands.
+7. **Scoring:** the hand ends as soon as someone runs out of cards. Everyone scores the number of cards left in their hand. **Lowest is best.**
+
 ## Features
 
 - **Lobby with share links:** create a match, send the link, friends pick a seat.
@@ -161,8 +180,8 @@ penta/
 │   │   ├── module.ts         # The interface every card game implements
 │   │   ├── penta.ts          # Match flow: 4 rounds × 5 games, summaries, game over
 │   │   └── games/
-│   │       ├── index.ts      # Game order (swap placeholders for real games here)
-│   │       └── placeholder.ts
+│   │       ├── index.ts      # Game order
+│   │       └── truf.ts, hearts.ts, sevens.ts, trumpon.ts, capsa.ts
 │   └── client/
 │       ├── App.tsx           # Home, create/join, rejoin
 │       ├── PentaBoard.tsx    # Table, seats, hand summary, final results
@@ -184,7 +203,7 @@ The rules code in `src/game` and `src/shared` has no UI code in it. The same cod
    - `handScores`: the hand's scores
    - `lowerIsBetter`: whether a lower score is better
 2. Create `src/client/games/<Game>Board.tsx` for the table screen.
-3. Replace the placeholder in `src/game/games/index.ts` and `src/client/games/index.ts`.
+3. Add it to `src/game/games/index.ts` and `src/client/games/index.ts`.
 4. Add tests under `test/`.
 
 ## Roadmap
@@ -194,5 +213,5 @@ The rules code in `src/game` and `src/shared` has no UI code in it. The same cod
 - [x] Hearts
 - [x] Sevens
 - [x] Trumpon
-- [ ] Capsa
+- [x] Capsa
 - [ ] Free online hosting, so friends can join from anywhere

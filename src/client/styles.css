@@ -236,6 +236,14 @@ h2 { margin: 0 0 0.5em; font-size: 1.15rem; }
 .mini-card.depth-2 { box-shadow: 2px 2px 0 0 #cfcab9; }
 .mini-card.depth-3 { box-shadow: 2px 2px 0 0 #cfcab9, 4px 4px 0 0 #a9a493; }
 
+/* Capsa: the play on top of the table, and who has passed this trick. */
+.capsa-table { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: calc(var(--small-h) + 1.6em); }
+.capsa-play { display: flex; }
+.capsa-play .card + .card { margin-left: calc(var(--small-w) * -0.3); }
+.capsa-label { font-size: 0.85rem; }
+.capsa-label strong { color: var(--accent); }
+.capsa-passed { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
 /* ---------- Cards ---------- */
 
 .card {
