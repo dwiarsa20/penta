@@ -1,5 +1,6 @@
-// Penta game server: multiplayer sync, lobby API, and match storage on disk so a
-// match survives restarts. In production it also serves the built web app.
+// Penta game server: multiplayer sync, lobby API, and match storage so a match survives
+// restarts (Postgres when DATABASE_URL is set, otherwise files on disk). In production it
+// also serves the built web app.
 
 import os from 'node:os';
 import path from 'node:path';
@@ -7,16 +8,21 @@ import { fileURLToPath } from 'node:url';
 import { Server, Origins, FlatFile } from 'boardgame.io/server';
 import serve from 'koa-static';
 import { Penta } from '../src/game/penta';
+import { PostgresStore } from './postgres';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT ?? 8000);
+// Render sets RENDER_EXTERNAL_URL to the site's public address.
+const origin = process.env.ORIGIN ?? process.env.RENDER_EXTERNAL_URL;
 
 const server = Server({
   games: [Penta],
-  db: new FlatFile({ dir: process.env.DATA_DIR ?? path.join(root, '..', 'data'), logging: false }),
-  // Set ORIGIN to the public site URL when hosting; locally any origin is allowed so
+  db: process.env.DATABASE_URL
+    ? new PostgresStore(process.env.DATABASE_URL)
+    : new FlatFile({ dir: process.env.DATA_DIR ?? path.join(root, '..', 'data'), logging: false }),
+  // When hosted, only the public site may connect; locally any origin is allowed so
   // phones on the same Wi-Fi can connect.
-  origins: process.env.ORIGIN ? [process.env.ORIGIN, Origins.LOCALHOST] : [/.*/],
+  origins: origin ? [origin, Origins.LOCALHOST] : [/.*/],
 });
 
 /** This PC's addresses on the local network, home Wi-Fi first, virtual adapters skipped. */

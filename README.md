@@ -6,7 +6,7 @@ An online card game for four friends: five classic card games, played back to ba
 
 Built with [boardgame.io](https://boardgame.io) and React, so everyone plays from a browser on their phone or laptop.
 
-> **Status:** all five games and the match framework are done. Next up is free online hosting.
+> **Status:** all five games and the match framework are done, and it can be hosted online for free (see [Hosting online](#hosting-online-for-free)).
 
 ---
 
@@ -119,7 +119,7 @@ Standard Hearts.
 - **Lobby with share links:** create a match, send the link, friends pick a seat.
 - **Hidden hands:** the server never sends other players' cards to your browser.
 - **Server-side rules:** every move is checked and shuffling happens on the server, so nobody can cheat from the browser.
-- **Saved matches:** matches are stored on disk, so a restart or a dropped connection doesn't lose a three-hour game. Players can rejoin from the same device.
+- **Saved matches:** matches are saved on disk, or in a Postgres database when hosted, so a restart or a dropped connection doesn't lose a three-hour game. Players can rejoin from the same device.
 - **Live scoresheet:** every hand's score, the □/△ marks, and running placement points.
 - **Mobile-friendly table:** the hand fits on a phone screen, and you always sit at the bottom.
 
@@ -163,15 +163,33 @@ The bar along the top deals a fresh hand of any game in any round, so you can te
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `PORT` | `8000` | Server port |
-| `DATA_DIR` | `./data` | Where matches are saved |
-| `ORIGIN` | *(any)* | Public site URL to allow when hosting online |
+| `DATABASE_URL` | *(none)* | Postgres connection string. When set, matches are saved there instead of on disk. |
+| `DATA_DIR` | `./data` | Where matches are saved when there's no database |
+| `ORIGIN` | *(any)* | Public site URL to allow when hosting online. On Render this is set automatically. |
+
+## Hosting online for free
+
+The game runs on [Render](https://render.com)'s free plan, with matches saved in a free [Neon](https://neon.com) Postgres database. Neither needs a credit card. Both live in Singapore, close to the players.
+
+1. **Database:** sign up at [neon.com](https://neon.com) and create a project in **AWS Asia Pacific (Singapore)**. Copy its connection string; it starts with `postgresql://`.
+2. **Server:** sign up at [render.com](https://render.com) with your GitHub account. Choose **New → Blueprint** and pick this repository. Render reads `render.yaml`, asks for `DATABASE_URL` (paste the connection string), then builds and starts the game.
+3. **Play:** open the `https://penta-….onrender.com` address Render gives you, create a match and send the link to your friends.
+
+Every push to `main` redeploys automatically.
+
+**Free plan limits:**
+
+- After **15 minutes** with nobody connected, the server goes to sleep. The next visit wakes it up, which takes about a minute. Saved matches aren't affected.
+- While a match is being played, the server stays awake. If a connection drops, the page reconnects by itself.
+- Render allows 750 free hours a month, more than one always-on server uses. Neon allows 100 database compute-hours a month, and the database also sleeps when idle.
 
 ## Project structure
 
 ```
 penta/
 ├── server/
-│   └── index.ts              # boardgame.io server, lobby API, saved matches, serves the app
+│   ├── index.ts              # boardgame.io server, lobby API, saved matches, serves the app
+│   └── postgres.ts           # Match storage in Postgres, for hosting
 ├── src/
 │   ├── shared/
 │   │   ├── cards.ts          # 52-card deck, dealing, sorting
@@ -214,4 +232,4 @@ The rules code in `src/game` and `src/shared` has no UI code in it. The same cod
 - [x] Sevens
 - [x] Trumpon
 - [x] Capsa
-- [ ] Free online hosting, so friends can join from anywhere
+- [x] Free online hosting, so friends can join from anywhere
