@@ -48,6 +48,7 @@ export function PentaBoard({ G, ctx, moves, playerID, matchData }: BoardProps<Pe
               <span className={`dot${matchData?.[p]?.isConnected ? ' on' : ''}`} />
               <span className="name">{names[p]}</span>
               <span className="count">{G.hand.handCounts[p]} cards</span>
+              {GameBoard.Seat && <GameBoard.Seat view={G.hand} player={p} />}
             </div>
           ))}
 

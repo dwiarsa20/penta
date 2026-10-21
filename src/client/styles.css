@@ -128,7 +128,7 @@ h2 { margin: 0 0 0.5em; font-size: 1.15rem; }
   max-width: 96px;
   text-align: center;
 }
-.seat.top { grid-area: top; flex-direction: row; gap: 8px; max-width: none; }
+.seat.top { grid-area: top; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 2px 8px; max-width: none; }
 .seat.left { grid-area: left; }
 .seat.right { grid-area: right; }
 .seat.active { border-color: var(--accent); box-shadow: 0 0 12px rgba(242, 193, 78, 0.5); }
@@ -207,6 +207,34 @@ h2 { margin: 0 0 0.5em; font-size: 1.15rem; }
 .sevens-slot.last .card { box-shadow: 0 0 0 3px var(--accent); }
 .sevens-suit.closed .card { filter: brightness(0.55); }
 .sevens-tag { font-size: 0.7rem; color: var(--muted); }
+
+/* Trumpon: your three piles beside your hand; others' piles in their seats.
+   The shadow layers show how many cards are left in a pile. */
+.trumpon-mine { display: flex; align-items: flex-end; gap: 12px; max-width: 100%; }
+.trumpon-piles { display: flex; gap: 6px; }
+.pile { padding-top: 16px; }
+.pile.depth-2 > .card { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 3px 3px 0 0 #cfcab9; }
+.pile.depth-3 > .card { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 3px 3px 0 0 #cfcab9, 6px 6px 0 0 #a9a493; }
+.pile.depth-2 > .card.selected, .pile.depth-3 > .card.selected { box-shadow: 0 0 0 3px var(--accent), 0 4px 10px rgba(0, 0, 0, 0.5); }
+.pile.card.empty { background: none; border: 2px dashed rgba(255, 255, 255, 0.25); box-shadow: none; padding: 0; margin-top: 16px; }
+.mini-piles { display: flex; gap: 4px; margin-top: 3px; }
+.mini-card {
+  width: 20px;
+  height: 28px;
+  border-radius: 3px;
+  background: var(--card-bg);
+  color: var(--card-black);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.05;
+  text-align: center;
+  padding-top: 2px;
+}
+.mini-card.red { color: var(--card-red); }
+.mini-card.back { background: repeating-linear-gradient(45deg, #8b1e2d 0 3px, #a3293a 3px 6px); border: 2px solid var(--card-bg); }
+.mini-card.empty { background: none; border: 1px dashed rgba(255, 255, 255, 0.3); }
+.mini-card.depth-2 { box-shadow: 2px 2px 0 0 #cfcab9; }
+.mini-card.depth-3 { box-shadow: 2px 2px 0 0 #cfcab9, 4px 4px 0 0 #a9a493; }
 
 /* ---------- Cards ---------- */
 

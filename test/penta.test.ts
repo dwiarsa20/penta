@@ -9,6 +9,7 @@ import { GAMES } from '../src/game/games';
 import { legalCards, type TrufState } from '../src/game/games/truf';
 import { legalCards as heartsLegal, type HeartsState } from '../src/game/games/hearts';
 import { legalCards as sevensLegal, placements, type SevensState } from '../src/game/games/sevens';
+import { legalCards as trumponLegal, type TrumponState } from '../src/game/games/trumpon';
 import type { HandView } from '../src/game/module';
 
 let matchCount = 0;
@@ -84,6 +85,9 @@ function autoAction(G: PentaView, p: number): unknown {
     const s = G.hand as HandView<SevensState>;
     const [card] = sevensLegal(s, p);
     return card ? { type: 'play', cardId: card.id, end: placements(s, card)[0] } : { type: 'close', cardId: s.hands[p][0].id };
+  }
+  if (GAMES[G.gameIndex].id === 'trumpon') {
+    return { type: 'play', cardId: trumponLegal(G.hand as HandView<TrumponState>, p)[0].id };
   }
   return { type: 'play', cardId: G.hand.hands[p][0].id };
 }

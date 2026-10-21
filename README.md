@@ -6,7 +6,7 @@ An online card game for four friends: five classic card games, played back to ba
 
 Built with [boardgame.io](https://boardgame.io) and React, so everyone plays from a browser on their phone or laptop.
 
-> **Status:** the match framework, **Truf**, **Hearts** and **Sevens** are done. The other two games are still placeholders (each player plays one card, highest wins) while the real rules are built one game at a time.
+> **Status:** the match framework, **Truf**, **Hearts**, **Sevens** and **Trumpon** are done. **Capsa** is still a placeholder (each player plays one card, highest wins) while the real rules are built one game at a time.
 
 ---
 
@@ -19,7 +19,7 @@ A Penta match is always **4 players, no partnerships**, and runs **4 rounds** of
 | 1 | Truf | Spades-style trick-taking |
 | 2 | Hearts | Standard Hearts (passing changes by round) |
 | 3 | Sevens | Sevens / layout building, with wild Aces |
-| 4 | Trumpon | Spades-style, further removed |
+| 4 | Trumpon | Truf with piles on the table instead of bids |
 | 5 | Capsa | Big Two / Chinese poker |
 
 Each game decides its own first player.
@@ -82,6 +82,18 @@ Standard Hearts.
 
    Any suit whose end was already finished when the Aces were set closes right then.
 6. **Scoring:** the total of your closed cards. 2–10 count face value, J 11, Q 12, K 13. Aces count **14** if Aces are high, **1** if low, and **7** if no Ace was ever played. **Lowest is best.**
+
+### Trumpon
+
+1. **Deal:** 13 cards each: **4 in your hand** and **3 piles of 3** in front of you, with each pile's top card face up.
+2. **Trump:** there's no bidding. The **highest face-up pile card** names trump (A high, then K, Q … 2; ties go ♠ > ♥ > ♦ > ♣), and its owner leads first.
+3. **Play:** as in Truf. You can play a card from your hand or the face-up top of any of your piles, and both count when following suit. Trump can't be led until it's been broken.
+4. **Face-down cards:** trumps from your hand are played **face down** until the trick is complete. Trumps from a pile stay face up, since everyone has already seen them. When you play from a pile, the card underneath stays face down, even to you, until the trick finishes.
+5. **Scoring:** you score the cards in the tricks you win. **Highest is best.** The whole deck adds up to +36.
+
+   | Cards | 2–5 | 6 | 7 | 8 | 9 | 10 | J | Q | K | A |
+   |---|---|---|---|---|---|---|---|---|---|---|
+   | Points | +1 | −1 | −2 | −3 | −4 | +5 | +1 | +2 | +3 | +4 |
 
 ## Features
 
@@ -175,6 +187,6 @@ The rules code in `src/game` and `src/shared` has no UI code in it. The same cod
 - [x] Truf
 - [x] Hearts
 - [x] Sevens
-- [ ] Trumpon
+- [x] Trumpon
 - [ ] Capsa
 - [ ] Free online hosting, so friends can join from anywhere
