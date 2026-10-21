@@ -9,8 +9,11 @@
   --card-bg: #fffdf7;
   --card-red: #c62828;
   --card-black: #1b1b1b;
-  --card-w: clamp(44px, 12.5vw, 76px);
+  /* Cards shrink with the screen's width and height, so short screens (a phone on its side) still fit. */
+  --card-w: clamp(30px, min(12.5vw, 9dvh), 76px);
   --card-h: calc(var(--card-w) * 1.4);
+  --small-w: calc(var(--card-w) * 0.82);
+  --small-h: calc(var(--small-w) * 1.4);
   --table-w: min(100vw, 960px);
   color-scheme: dark;
 }
@@ -145,6 +148,8 @@ h2 { margin: 0 0 0.5em; font-size: 1.15rem; }
 
 .my-area {
   grid-area: me;
+  position: relative;
+  z-index: 1; /* buttons stay on top and clickable even if the table gets crowded */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -161,13 +166,15 @@ h2 { margin: 0 0 0.5em; font-size: 1.15rem; }
     'left . right'
     '. bottom .';
   gap: 4px;
-  min-width: calc(var(--card-w) * 3);
-  min-height: calc(var(--card-h) * 2.2);
+  min-width: calc(var(--small-w) * 3 + 8px);
+  min-height: calc(var(--small-h) * 2 + 8px);
   place-items: center;
 }
 .trick-slot.top { grid-area: top; }
 .trick-slot.left { grid-area: left; }
 .trick-slot.right { grid-area: right; }
+/* Left and right cards sit between top and bottom, so four cards take two card heights, not three. */
+.trick-slot.left, .trick-slot.right { margin-block: calc(var(--small-h) / -2); }
 .trick-slot.bottom { grid-area: bottom; }
 .trick-slot.win .card { box-shadow: 0 0 0 3px var(--accent); }
 .trick-slot { display: flex; flex-direction: column; align-items: center; gap: 2px; transition: transform 0.4s ease-in, opacity 0.4s ease-in; }
@@ -216,7 +223,7 @@ h2 { margin: 0 0 0.5em; font-size: 1.15rem; }
   bottom: 4%;
   font-size: calc(var(--card-w) * 0.45);
 }
-.card.small { --card-w: clamp(40px, 10vw, 62px); }
+.card.small { --card-w: var(--small-w); }
 .card.selected { transform: translateY(-14px); box-shadow: 0 0 0 3px var(--accent), 0 4px 10px rgba(0, 0, 0, 0.5); }
 .card.dimmed { filter: brightness(0.6); }
 .card.back {
@@ -234,6 +241,23 @@ h2 { margin: 0 0 0.5em; font-size: 1.15rem; }
   max-width: 100%;
 }
 .hand .card + .card { margin-left: calc(var(--step) - var(--card-w)); }
+
+/* Short screens (a phone on its side): smaller cards and tighter spacing so the table fits. */
+@media (max-height: 500px) {
+  :root { --card-w: clamp(30px, min(12.5vw, 7.5dvh), 76px); }
+  .topbar { padding-block: 2px; }
+  .felt { gap: 2px; padding: 4px 8px; }
+  .seat { padding: 3px 8px; }
+  .hand { padding-top: 8px; }
+  .controls, .my-area button { min-height: 36px; }
+  .my-area button { padding-block: 0.3em; }
+  .table-center .note { margin: 2px 0; }
+}
+
+/* ---------- Test table (development): four phone-shaped player screens side by side ---------- */
+
+.test-table { display: grid; grid-template: 1fr / repeat(4, 1fr); gap: 2px; height: 100dvh; background: #000; }
+.test-table iframe { width: 100%; height: 100%; border: 0; }
 
 /* ---------- Overlays ---------- */
 

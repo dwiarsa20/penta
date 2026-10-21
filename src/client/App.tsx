@@ -18,8 +18,13 @@ const PentaClient = Client({
   loading: () => <div className="center-msg">Connecting…</div>,
 });
 
-function currentMatchID() {
-  return new URLSearchParams(window.location.search).get('match');
+const param = (name: string) => new URLSearchParams(window.location.search).get(name);
+const currentMatchID = () => param('match');
+
+/** In a test match, which seat this page plays (`?as=0`-`3`). Development only. */
+function testSeat(matchID: string) {
+  const as = import.meta.env.DEV ? param('as') : null;
+  return as == null ? undefined : store.getTestSeats(matchID)[Number(as)];
 }
 
 function goTo(matchID: string | null) {
@@ -35,6 +40,8 @@ export function App() {
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
+  const testID = import.meta.env.DEV ? param('test') : null;
+  if (testID) return <TestTable matchID={testID} />;
   return matchID ? <MatchRoom key={matchID} matchID={matchID} /> : <Home />;
 }
 
@@ -80,6 +87,28 @@ function Home() {
     }
   };
 
+  /** Create a match, take all four seats, and open the four-player test table. */
+  const createTest = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      const { matchID } = await lobby.createMatch(GAME_NAME, { numPlayers: 4 });
+      const seats: store.SavedSeat[] = [];
+      for (const playerID of ['0', '1', '2', '3']) {
+        const { playerCredentials } = await lobby.joinMatch(GAME_NAME, matchID, {
+          playerID,
+          playerName: `Player ${Number(playerID) + 1}`,
+        });
+        seats.push({ matchID, playerID, credentials: playerCredentials, joinedAt: Date.now() });
+      }
+      store.saveTestSeats(matchID, seats);
+      window.location.search = `?test=${encodeURIComponent(matchID)}`;
+    } catch {
+      setError('Could not reach the game server. Is it running?');
+      setBusy(false);
+    }
+  };
+
   return (
     <main className="page">
       <h1>Penta</h1>
@@ -90,6 +119,11 @@ function Home() {
         <button className="primary" disabled={!name.trim() || busy} onClick={create}>
           Create new match
         </button>
+        {import.meta.env.DEV && (
+          <button disabled={busy} onClick={createTest}>
+            Test match: play all 4 seats
+          </button>
+        )}
         {error && <p className="error">{error}</p>}
       </section>
 
@@ -128,7 +162,7 @@ function Home() {
 type MatchInfo = Awaited<ReturnType<LobbyClient['getMatch']>>;
 
 function MatchRoom({ matchID }: { matchID: string }) {
-  const [seat, setSeat] = useState(() => store.getSeat(matchID));
+  const [seat, setSeat] = useState(() => testSeat(matchID) ?? store.getSeat(matchID));
   const [spectating, setSpectating] = useState(false);
   const [match, setMatch] = useState<MatchInfo | null>(null);
   const [error, setError] = useState('');
@@ -198,5 +232,16 @@ function MatchRoom({ matchID }: { matchID: string }) {
         ← Back
       </button>
     </main>
+  );
+}
+
+/** All four players' screens on one page, each in its own frame. Development only. */
+function TestTable({ matchID }: { matchID: string }) {
+  return (
+    <div className="test-table">
+      {[0, 1, 2, 3].map((p) => (
+        <iframe key={p} title={`Player ${p + 1}`} src={`?match=${encodeURIComponent(matchID)}&as=${p}`} />
+      ))}
+    </div>
   );
 }

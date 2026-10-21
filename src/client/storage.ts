@@ -38,3 +38,7 @@ export function saveSeat(seat: SavedSeat) {
 export function forgetSeat(matchID: string) {
   write('penta.seats', getSeats().filter((s) => s.matchID !== matchID));
 }
+
+// Test matches (development only): one browser holds all four seats.
+export const getTestSeats = (matchID: string) => read<SavedSeat[]>(`penta.test.${matchID}`, []);
+export const saveTestSeats = (matchID: string, seats: SavedSeat[]) => write(`penta.test.${matchID}`, seats);
