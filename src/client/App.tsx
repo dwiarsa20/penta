@@ -184,6 +184,7 @@ function MatchRoom({ matchID }: { matchID: string }) {
   }
 
   const freeSeat = match?.players.find((p) => !p.name);
+  const offline = match?.players.filter((p) => p.name && !p.isConnected) ?? [];
 
   const join = async () => {
     if (!freeSeat) return;
@@ -202,6 +203,25 @@ function MatchRoom({ matchID }: { matchID: string }) {
     }
   };
 
+  /** Back into your own seat from a new device or link, e.g. after the host restarted. */
+  const takeBack = async (playerID: number, playerName: string) => {
+    if (!window.confirm(`Take back ${playerName}’s seat? Only do this if you are ${playerName}.`)) return;
+    try {
+      const res = await fetch(`${SERVER_URL}/reclaim`, {
+        method: 'POST',
+        body: JSON.stringify({ matchID, playerID: String(playerID) }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const { playerCredentials } = (await res.json()) as { playerCredentials: string };
+      const saved = { matchID, playerID: String(playerID), credentials: playerCredentials, joinedAt: Date.now() };
+      store.saveSeat(saved);
+      setSeat(saved);
+    } catch (e) {
+      setError((e as Error).message || 'Couldn’t take back that seat. Try again.');
+      lobby.getMatch(GAME_NAME, matchID).then(setMatch).catch(() => {});
+    }
+  };
+
   return (
     <main className="page">
       <h1>Penta</h1>
@@ -212,7 +232,10 @@ function MatchRoom({ matchID }: { matchID: string }) {
           <ul className="seat-list">
             {match.players.map((p) => (
               <li key={p.id} className={p.name ? '' : 'muted'}>
-                {p.name ?? 'Open seat'}
+                <span>{p.name ?? 'Open seat'}</span>
+                {p.name && !p.isConnected && (
+                  <button onClick={() => takeBack(p.id, p.name!)}>That’s me</button>
+                )}
               </li>
             ))}
           </ul>
@@ -225,6 +248,9 @@ function MatchRoom({ matchID }: { matchID: string }) {
             </>
           ) : (
             <p className="muted">All four seats are taken.</p>
+          )}
+          {offline.length > 0 && (
+            <p className="note">Lost your seat, e.g. after the host restarted? Tap “That’s me” next to your name.</p>
           )}
           <button onClick={() => setSpectating(true)}>Watch</button>
         </section>

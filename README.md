@@ -149,7 +149,8 @@ Create a match there. The link on the waiting screen is the public one, so copy 
 
 - **The link is new every time you start hosting**, so send it after you start.
 - **Matches are saved on the host's computer**, in the `data` folder. A different host starts with fresh matches.
-- **If hosting stops mid-match**, start it again on the same computer and the match is still there, at a new link. Players' seats are remembered per link, though, so friends can only watch from the new link, not take their seats back.
+- **If hosting stops mid-match**, start it again on the same computer and the match is still there, at a new link. Send the new link; everyone opens it and taps **That's me** next to their name to get their seat back. The same works for a player switching to another phone or laptop.
+- **Only share match links with the players.** Anyone with the link can take back a seat whose player isn't connected.
 - **The host's computer must stay awake.** Sleep mode stops the game.
 - Windows may ask whether to let Node.js through the firewall. Either answer works; allowing it only matters for players on your own Wi-Fi.
 
