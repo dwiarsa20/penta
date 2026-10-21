@@ -4,9 +4,10 @@
 import { describe, expect, it } from 'vitest';
 import { Client } from 'boardgame.io/client';
 import { Local } from 'boardgame.io/multiplayer';
-import { Penta, type PentaView } from '../src/game/penta';
+import { lowerIsBetter, Penta, type PentaView } from '../src/game/penta';
 import { GAMES } from '../src/game/games';
 import { legalCards, type TrufState } from '../src/game/games/truf';
+import { legalCards as heartsLegal, type HeartsState } from '../src/game/games/hearts';
 import type { HandView } from '../src/game/module';
 
 let matchCount = 0;
@@ -73,6 +74,11 @@ function autoAction(G: PentaView, p: number): unknown {
     if (s.phase === 'choose') return { type: 'mode', mode: 'bawah' };
     return { type: 'play', cardId: legalCards(s, p)[0].id };
   }
+  if (GAMES[G.gameIndex].id === 'hearts') {
+    const s = G.hand as HandView<HeartsState>;
+    if (s.phase === 'pass') return { type: 'pass', cardIds: s.hands[p].slice(0, 3).map((c) => c.id) };
+    return { type: 'play', cardId: heartsLegal(s, p)[0].id };
+  }
   return { type: 'play', cardId: G.hand.hands[p][0].id };
 }
 
@@ -82,7 +88,7 @@ function countTieLoss(G: Pick<PentaView, 'history'>) {
   for (let g = 0; g < 5; g++) {
     const totals = [0, 0, 0, 0];
     G.history.filter((h) => h.gameIndex === g).forEach((h) => h.scores.forEach((s, p) => (totals[p] += s)));
-    const sorted = [...totals].sort((a, b) => b - a);
+    const sorted = [...totals].sort((a, b) => (lowerIsBetter[g] ? a - b : b - a));
     const table = [5, 3, 1, 0];
     const awarded = sorted.reduce((sum, v, i) => (sorted.indexOf(v) === i ? sum + table[i] : sum), 0);
     lost += 9 - awarded;

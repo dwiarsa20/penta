@@ -6,7 +6,7 @@ An online card game for four friends: five classic card games, played back to ba
 
 Built with [boardgame.io](https://boardgame.io) and React, so everyone plays from a browser on their phone or laptop.
 
-> **Status:** the match framework and **Truf** are done. The other four games are still placeholders (each player plays one card, highest wins) while the real rules are built one game at a time.
+> **Status:** the match framework, **Truf** and **Hearts** are done. The other three games are still placeholders (each player plays one card, highest wins) while the real rules are built one game at a time.
 
 ---
 
@@ -17,7 +17,7 @@ A Penta match is always **4 players, no partnerships**, and runs **4 rounds** of
 | # | Game | Based on |
 |---|------|----------|
 | 1 | Truf | Spades-style trick-taking |
-| 2 | Hearts | Hearts (house rules change by round) |
+| 2 | Hearts | Standard Hearts (passing changes by round) |
 | 3 | Sevens | Sevens / layout building |
 | 4 | Trumpon | Spades-style, further removed |
 | 5 | Capsa | Big Two / Chinese poker |
@@ -58,6 +58,15 @@ Each game decides its own first player.
    | Atas | −2 each | −1 each |
 
    A **0 bid** (J/Q/K) scores **+5** if made, or **−5** on top of the normal penalty if missed. It keeps the ±5 even when Atas raises it to 1.
+
+### Hearts
+
+Standard Hearts.
+
+1. **Passing:** everyone passes 3 cards at the same time. Round 1 passes left, round 2 right, round 3 across, and round 4 has no passing.
+2. **Play:** whoever holds the 2♣ leads it. Follow suit if you can. There's no trump, so the highest card of the suit led wins. No hearts or Q♠ on the first trick unless you have nothing else. Hearts can't be led until one has been played, unless you hold only hearts.
+3. **Scoring:** 1 point per heart and 13 for the Q♠. **Lowest is best.**
+4. **Shooting the moon:** take all 26 points and you score 0 while everyone else scores 26. So the shooter gets the □ and the other three each get a △.
 
 ## Features
 
@@ -149,7 +158,7 @@ The rules code in `src/game` and `src/shared` has no UI code in it. The same cod
 
 - [x] Match framework, scoring, lobby, saved matches
 - [x] Truf
-- [ ] Hearts, including the round-by-round rule changes
+- [x] Hearts
 - [ ] Sevens
 - [ ] Trumpon
 - [ ] Capsa

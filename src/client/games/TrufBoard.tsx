@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { HandView } from '../../game/module';
 import { bidValue, legalCards, TOTAL_TRICKS, type TrufState } from '../../game/games/truf';
-import { isFaceDown, rankLabel, SUIT_NAME, SUIT_SYMBOL } from '../../shared/cards';
+import { cardLabel, isFaceDown, SUIT_NAME, SUIT_SYMBOL } from '../../shared/cards';
 import { Hand } from '../components/CardView';
 import { TrickArea, useTrickHold } from '../components/TrickArea';
 import type { GameBoardProps } from './types';
@@ -42,7 +42,7 @@ export function TrufBoard({ view, me, active, names, act, seat }: GameBoardProps
       : 'Waiting for everyone to bid…';
   } else if (view.phase === 'reveal' || view.phase === 'choose') {
     const callCard = view.bidCards[caller!];
-    const callLabel = callCard && !isFaceDown(callCard) ? `${rankLabel(callCard.rank)}${SUIT_SYMBOL[callCard.suit]}` : '';
+    const callLabel = callCard && !isFaceDown(callCard) ? cardLabel(callCard) : '';
     const total = view.bids.reduce((a, b) => a + b, 0);
     const next =
       total < TOTAL_TRICKS

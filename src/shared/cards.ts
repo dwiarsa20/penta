@@ -27,6 +27,9 @@ export function rankLabel(rank: Rank): string {
   return ({ 11: 'J', 12: 'Q', 13: 'K', 14: 'A' } as Record<number, string>)[rank] ?? String(rank);
 }
 
+/** Short label for messages, e.g. "Q♠". */
+export const cardLabel = (card: Card) => `${rankLabel(card.rank)}${SUIT_SYMBOL[card.suit]}`;
+
 export function makeCard(rank: Rank, suit: Suit): Card {
   return { id: `${rankLabel(rank)}${suit}`, rank, suit };
 }
