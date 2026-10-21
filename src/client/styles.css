@@ -161,20 +161,19 @@ h2 { margin: 0 0 0.5em; font-size: 1.15rem; }
 /* Cards in the middle, each pushed toward whoever played it. */
 .trick {
   display: grid;
+  /* A diamond: left and right sit between top and bottom, so four cards take two card heights.
+     Rows and columns keep their size when a seat hasn't played yet. */
   grid-template-areas:
-    '. top .'
-    'left . right'
-    '. bottom .';
+    'left top right'
+    'left bottom right';
+  grid-template-columns: repeat(3, minmax(var(--small-w), auto));
+  grid-template-rows: repeat(2, minmax(var(--small-h), auto));
   gap: 4px;
-  min-width: calc(var(--small-w) * 3 + 8px);
-  min-height: calc(var(--small-h) * 2 + 8px);
   place-items: center;
 }
 .trick-slot.top { grid-area: top; }
 .trick-slot.left { grid-area: left; }
 .trick-slot.right { grid-area: right; }
-/* Left and right cards sit between top and bottom, so four cards take two card heights, not three. */
-.trick-slot.left, .trick-slot.right { margin-block: calc(var(--small-h) / -2); }
 .trick-slot.bottom { grid-area: bottom; }
 .trick-slot.win .card { box-shadow: 0 0 0 3px var(--accent); }
 .trick-slot { display: flex; flex-direction: column; align-items: center; gap: 2px; transition: transform 0.4s ease-in, opacity 0.4s ease-in; }
